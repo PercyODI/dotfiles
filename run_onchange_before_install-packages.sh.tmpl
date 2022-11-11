@@ -1,0 +1,35 @@
+#!/bin/sh
+
+
+# -------------------------
+# OS Dependent Installation
+# -------------------------
+
+packages=('curl' 'asdf' 'ripgrep' 'zsh')
+
+
+# Install brew and install on MacOS
+{{ if eq .chezmoi.os "darwin" -}}
+
+which -s brew
+if [[ $? != 0 ]] ; then
+	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+brew install ${packages[*]}
+
+# Install on Ubuntu (apt) linux
+{{ else if eq .chezmoi.os "linux" -}}
+
+apt install ${packages[*]}
+
+{{ end -}}
+
+# ------------------------
+# OS Agnostic Installation
+# ------------------------
+
+# Install OhMyZsh if directory doesn't exist
+if [ ! -d ~/.oh-my-zsh ]; then
+	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
