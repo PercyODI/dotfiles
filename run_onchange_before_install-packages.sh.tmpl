@@ -1,5 +1,4 @@
-#!/bin/sh
-
+#!/bin/bash
 
 # -------------------------
 # OS Dependent Installation
@@ -13,7 +12,7 @@ packages=('curl' 'asdf' 'ripgrep' 'zsh')
 
 which -s brew
 if [[ $? != 0 ]] ; then
-	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
 brew install ${packages[*]}
@@ -31,5 +30,5 @@ apt install ${packages[*]}
 
 # Install OhMyZsh if directory doesn't exist
 if [ ! -d ~/.oh-my-zsh ]; then
-	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
