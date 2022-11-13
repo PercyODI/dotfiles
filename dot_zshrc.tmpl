@@ -103,4 +103,13 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+{{ if eq .chezmoi.os "darwin" }}
 . /opt/homebrew/opt/asdf/libexec/asdf.sh
+{{ else if eq .chezmoi.os "linux" }}
+. ~/.asdf/asdf.sh
+
+# append completions to fpath
+fpath=(${ASDF_DIR}/completions $fpath)
+# initialise completions with ZSH's compinit
+autoload -Uz compinit && compinit
+{{ end }}

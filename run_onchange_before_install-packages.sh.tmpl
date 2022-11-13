@@ -4,24 +4,40 @@
 # OS Dependent Installation
 # -------------------------
 
-packages=('curl' 'asdf' 'ripgrep' 'zsh')
+universalpackages=('curl' 'vim' 'ripgrep' 'zsh')
 
 
 # Install brew and install on MacOS
 {{ if eq .chezmoi.os "darwin" -}}
+macpackages=('asdf' 'openssl' 'readline' 'sqlite3' 'xz' 'zlib' 'tcl-tk')
 
 which -s brew
 if [[ $? != 0 ]] ; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-brew install ${packages[*]}
+brew install ${universalpackages[*]}
+brew install ${macpackages[*]}
 
-# Install on Ubuntu (apt) linux
+# --- Install on Ubuntu (apt) linux ---
 {{ else if eq .chezmoi.os "linux" -}}
+linuxpackages=('unzip' 'fontconfig' 'make' 'build-essential' 'libssl-dev' 'zlib1g-dev' 'libbz2-dev' 'libreadline-dev' 'libsqlite3-dev' 'wget' 'llvm' 'libncursesw5-dev' 'xz-utils' 'tk-dev' 'libxml2-dev' 'libxmlsec1-dev' 'libffi-dev' 'liblzma-dev' 'ninja-build' 'gettext' 'libtool' 'libtool-bin' 'autoconf' 'automake' 'cmake' 'g++' 'pkg-config' 'doxygen') 
 
-apt install ${packages[*]}
+sudo apt install ${universalpackages[*]}
+sudo apt install ${linuxpackages[*]}
+git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.10.3
 
+# ----- Install Fonts -----
+
+if [ ! -f ~/.local/share/fonts/Fira\ Code\ Regular\ Nerd\ Font\ Complete\ Mono.ttf ]; then
+    curl https://github.com/ryanoasis/nerd-fonts/releases/download/v2.2.2/FiraCode.zip -L -o /tmp/FiraCode.zip
+    mkdir -p ~/.local/share/fonts
+    unzip /tmp/FiraCode.zip -d ~/.local/share/fonts
+    rm /tmp/FiraCode.zip
+    fc-cache -fv
+else
+    echo 'Fonts installed. Skipping.'
+fi
 {{ end -}}
 
 # ------------------------
@@ -31,4 +47,18 @@ apt install ${packages[*]}
 # Install OhMyZsh if directory doesn't exist
 if [ ! -d ~/.oh-my-zsh ]; then
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+else
+    echo 'Oh My Zsh installed. Skipping.'
+fi
+if [ ! -d ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions ]; then
+	git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+else
+    echo 'zsh-autosuggestions installed. Skipping.'
+fi
+
+# Install nvim/Packer things
+if [ ! -d ~/.local/share/nvim/site/pack/packer/start/packer.nvim ]; then
+    git clone --depth 1 https://github.com/wbthomason/packer.nvim ~/.local/share/nvim/site/pack/packer/start/packer.nvim
+else
+    echo 'packer.nvim installed. Skipping.'
 fi
