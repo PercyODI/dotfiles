@@ -31,8 +31,37 @@ require('packer').startup(function(use)
   use 'neovim/nvim-lspconfig'                                                          -- Collection of configurations for built-in LSP client
   use 'williamboman/mason.nvim'                                                        -- Manage external editor tooling i.e LSP servers
   use 'williamboman/mason-lspconfig.nvim'                                              -- Automatically install language servers to stdpath
-  use { 'hrsh7th/nvim-cmp', requires = { 'hrsh7th/cmp-nvim-lsp' } }                    -- Autocompletion
-  use { 'L3MON4D3/LuaSnip', requires = { 'saadparwaiz1/cmp_luasnip' } }                -- Snippet Engine and Snippet Expansion
+  use { 'jose-elias-alvarez/null-ls.nvim',
+    config = function()
+      local null_ls = require 'null-ls'
+
+      --local builtins = null_ls.builtins
+
+      local sources = {
+        -- builtins.diagnostics.eslint,
+        --builtins.code_actions.eslint_d,
+        -- builtins.formatting.prettier
+        --builtins.diagnostics.sqlfluff,
+        --builtins.formatting.sqlfluff,
+        --null_ls.builtins.diagnostics.pycodestyle,
+        null_ls.builtins.formatting.autopep8,
+      }
+
+      null_ls.setup {
+        sources = sources
+      }
+    end
+  }
+ 
+  --  use { 'hrsh7th/nvim-cmp', requires = { 'hrsh7th/cmp-nvim-lsp' } }                    -- Autocompletion
+  --  Autocompletion
+  use { 
+    'ms-jpq/coq_nvim',
+    branch = 'coq',
+    run = ":COQdeps"
+  }
+  use { 'ms-jpq/coq.artifacts', branch = 'artifacts' }
+  -- use { 'L3MON4D3/LuaSnip', requires = { 'saadparwaiz1/cmp_luasnip' } }                -- Snippet Engine and Snippet Expansion
   use 'navarasu/onedark.nvim'                                                           -- Theme inspired by Atom
   use 'nvim-lualine/lualine.nvim'                                                      -- Fancier statusline
   use 'lukas-reineke/indent-blankline.nvim'                                            -- Add indentation guides even on blank lines
@@ -51,6 +80,34 @@ require('packer').startup(function(use)
     'folke/which-key.nvim',
     config = function()
       require('which-key').setup {}
+    end
+  }
+
+  use({
+    "folke/noice.nvim",
+    config = function()
+      require("noice").setup({
+          -- add any options here
+      })
+    end,
+    requires = {
+      -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+      "MunifTanjim/nui.nvim",
+      -- OPTIONAL:
+      --   `nvim-notify` is only needed, if you want to use the notification view.
+      --   If not available, we use `mini` as the fallback
+      "rcarriga/nvim-notify",
+      }
+  })
+
+  use {
+    'rmagatti/auto-session',
+    config = function()
+      require("auto-session").setup {
+        log_level = "error",
+        auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/"},
+        auto_session_root_dir = os.getenv('HOME')..'/.vim/sessions/'
+      }
     end
   }
 
@@ -144,13 +201,13 @@ vim.keymap.set('t', '<C-j>', '<C-\\><C-n><C-W>j', {})
 vim.keymap.set('t', '<C-l>', '<C-\\><C-n><C-W>l', {})
 
 ---- Enter Terminal in edit mode
-vim.api.nvim_create_autocmd(
-  { 'BufEnter' },
-  {
-    pattern = { 'term://*' },
-    command = 'startinsert'
-  }
-)
+-- vim.api.nvim_create_autocmd(
+--   { 'BufEnter' },
+--   {
+--     pattern = { 'term://*' },
+--     command = 'startinsert'
+--   }
+-- )
 
 
 --- Change window pane size
@@ -162,6 +219,15 @@ vim.keymap.set('n', '-', ':resize -5<CR>', {})
 -- CHADTree
 vim.keymap.set('n', '<Leader>v', '<cmd>CHADopen<CR>', {})
 
+-- copy path to file from CWD
+vim.keymap.set('n', 'cp', ':let @* = expand("%")<CR>')
+-- copy current relative file path
+vim.keymap.set('n', 'crp', ':let @* = expand("%:~")<CR>')
+-- copy current file name
+vim.keymap.set('n', 'cn', ':let @* = expand("%:t")<CR>')
+
+-- Mappings for null ls pep8 formatting
+vim.keymap.set('v', '<leader>f', vim.lsp.buf.format)
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
 
@@ -374,7 +440,7 @@ local on_attach = function(_, bufnr)
 end
 
 -- nvim-cmp supports additional completion capabilities
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
+-- local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 -- Setup mason so it can manage external tooling
 require('mason').setup()
@@ -401,7 +467,8 @@ local runtime_path = vim.split(package.path, ';')
 table.insert(runtime_path, 'lua/?.lua')
 table.insert(runtime_path, 'lua/?/init.lua')
 
-require('lspconfig').sumneko_lua.setup {
+local coq = require 'coq'
+require('lspconfig').sumneko_lua.setup(coq.lsp_ensure_capabilities {
   on_attach = on_attach,
   capabilities = capabilities,
   settings = {
@@ -420,50 +487,59 @@ require('lspconfig').sumneko_lua.setup {
       telemetry = { enable = false },
     },
   },
+})
+
+-- COQ Setup
+
+vim.g.coq_settings = {
+  auto_start = 'shut-up',
+  keymap = {
+    jump_to_mark = ''
+  }
 }
 
 -- nvim-cmp setup
-local cmp = require 'cmp'
-local luasnip = require 'luasnip'
-
-cmp.setup {
-  snippet = {
-    expand = function(args)
-      luasnip.lsp_expand(args.body)
-    end,
-  },
-  mapping = cmp.mapping.preset.insert {
-    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
-      select = true,
-    },
-    ['<Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-  },
-  sources = {
-    { name = 'nvim_lsp' },
-    { name = 'luasnip' },
-  },
-}
+-- local cmp = require 'cmp'
+-- local luasnip = require 'luasnip'
+--
+-- cmp.setup {
+--   snippet = {
+--     expand = function(args)
+--       luasnip.lsp_expand(args.body)
+--     end,
+--   },
+--   mapping = cmp.mapping.preset.insert {
+--     ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+--     ['<C-f>'] = cmp.mapping.scroll_docs(4),
+--     ['<C-Space>'] = cmp.mapping.complete(),
+--     ['<CR>'] = cmp.mapping.confirm {
+--       behavior = cmp.ConfirmBehavior.Replace,
+--       select = true,
+--     },
+--     ['<Tab>'] = cmp.mapping(function(fallback)
+--       if cmp.visible() then
+--         cmp.select_next_item()
+--       elseif luasnip.expand_or_jumpable() then
+--         luasnip.expand_or_jump()
+--       else
+--         fallback()
+--       end
+--     end, { 'i', 's' }),
+--     ['<S-Tab>'] = cmp.mapping(function(fallback)
+--       if cmp.visible() then
+--         cmp.select_prev_item()
+--       elseif luasnip.jumpable(-1) then
+--         luasnip.jump(-1)
+--       else
+--         fallback()
+--       end
+--     end, { 'i', 's' }),
+--   },
+--   sources = {
+--     { name = 'nvim_lsp' },
+--     { name = 'luasnip' },
+--   },
+-- }
 
 -- nvim-tree setup
 -- require('nvim-tree').setup{}
