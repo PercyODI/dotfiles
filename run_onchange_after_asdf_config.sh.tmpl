@@ -6,15 +6,19 @@
 # asdf install chezmoi 2.27.0 &&
 # asdf global chezmoi 2.27.0
 
-asdf plugin add neovim &&
+asdf plugin add neovim
+
 asdf install neovim 0.7.2 &&
-asdf global neovim 0.7.2
+
+asdf install neovim 0.8.1 &&
+asdf global neovim 0.8.1
 
 asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git &&
 asdf install nodejs 18.12.1 &&
 asdf global nodejs 18.12.1
 
 npm install -g tree-sitter-cli
+npm install -g pyright
 
 {{ if eq .chezmoi.os "linux" }}
 
