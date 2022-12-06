@@ -77,13 +77,17 @@ return require('packer').startup(function(use)
     'ms-jpq/coq_nvim',
     -- after = { 'nvim-lspconfig' },
     branch = 'coq',
-    run = ":COQdeps",
-    -- after = { 'nvim-lspconfig' }
+    run = ":COQdeps"
   }
   use { 'ms-jpq/coq.artifacts', 
     branch = 'artifacts',
-    -- after = { 'coq_nvim', 'nvim-lspconfig' }
+    -- after = { 'coq_nvim', 'nvim-lspconfig' },
+    -- config = [[require('lang-server-config')]]
   }
+
+  -- File Explorer
+  use { 'ms-jpq/chadtree', run = 'python3 -m chadtree deps', branch = 'chad' }
+
 
   -- Which Key for viewing command possibilities
   use {

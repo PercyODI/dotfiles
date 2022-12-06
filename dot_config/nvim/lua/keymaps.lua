@@ -27,3 +27,6 @@ vim.keymap.set('n', 'cp', ':let @+ = expand("%")<CR>', { desc='copy path to file
 vim.keymap.set('n', 'crp', ':let @+ = expand("%:~")<CR>', { desc='copy current relative file path' })
 -- copy current file name
 vim.keymap.set('n', 'cn', ':let @+ = expand("%:t")<CR>', { desc='copy current file name' })
+
+-- open CHADTree
+vim.keymap.set('n', '<Leader>v', '<cmd>CHADopen<CR>', {})
