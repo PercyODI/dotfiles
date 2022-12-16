@@ -1,7 +1,22 @@
 print('Starting lang-server-config')
 -- Sets up COQ with nvim-lspconfig configs.
 -- Must be done after nvim-lspconfig
-vim.g.coq_settings = { auto_start = 'shut-up' }
+vim.g.coq_settings = { 
+  auto_start = 'shut-up',
+  display = {
+    preview = {
+      positions = {
+		  north = 3,
+		  south = 4,
+		  west = nil,
+		  east = nil
+	  }
+    }
+  },
+  keymap = {
+	jump_to_mark = ''
+  }
+}
 
 local coq = require('coq')
 local lspconfig = require('lspconfig')
@@ -48,8 +63,10 @@ local on_attach = function(client, bufnr)
   vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts("LSP: Type Definition"))
   vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts("LSP: Rename"))
   vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts("LSP: Code Action"))
-  vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts("LSP: References"))
+  vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts("LSP: Go To References"))
   vim.keymap.set('n', '<space>f', function() vim.lsp.buf.format { async = true } end, bufopts("LSP: Format"))
+
+
 end
 
 local lsp_flags = {
@@ -63,3 +80,15 @@ for _, lsp in ipairs(language_servers) do
     flags = lsp_flags
   }))
 end
+
+local dap, dapui = require('dap'), require('dapui')
+dap.listeners.after.event_initialized['dapui_config'] = function()
+	dapui.open()
+end
+dap.listeners.before.event_terminated['dapui_config'] = function()
+	dapui.close()
+end
+dap.listeners.before.event_exited['dapui_config'] = function()
+	dapui.close()
+end
+

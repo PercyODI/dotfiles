@@ -25,6 +25,9 @@ vim.opt.shiftwidth = 4
 -- Highlight the current line
 vim.opt.cursorline = true
 
+-- Set nowrap as default
+vim.wo.wrap = false
+
 -- Check if file changed outside vim & re-read file
 autocmd('focus_gain', [[FocusGained * silent! noautocmd checktime]], true)
 

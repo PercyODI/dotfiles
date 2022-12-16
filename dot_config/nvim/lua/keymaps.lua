@@ -1,6 +1,8 @@
+local wk = require('which-key')
+
 -- Custom keymaps
 --- Get out without Esc
-vim.keymap.set({'i', 'v'}, 'jk', '<Esc>', { desc = 'Escape back to normal mode' })
+vim.keymap.set({'i'}, 'jk', '<Esc>', { desc = 'Escape back to normal mode' })
 vim.keymap.set('t', 'jk', '<C-\\><C-n>', { desc = 'Escape back to normal mode'})
 
 --- Change window pane by direction
@@ -30,3 +32,47 @@ vim.keymap.set('n', 'cn', ':let @+ = expand("%:t")<CR>', { desc='copy current fi
 
 -- open CHADTree
 vim.keymap.set('n', '<Leader>v', '<cmd>CHADopen<CR>', {})
+
+-- Telescope keymaps
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
+vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
+vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
+
+-- nvim-dap keymaps
+wk.register({
+	['<leader>d'] = {
+		name = 'Debug Commands',
+		c = {[[:lua require'dap'.continue()<CR>]], 'DAP: Continue or Start'},
+		o = {[[:lua require'dap'.step_over()<CR>]], 'DAP: Step Over'},
+		i = {[[:lua require'dap'.step_into()<CR>]], 'DAP: Step Into'},
+		u = {[[:lua require'dap'.set_out()<CR>]], 'DAP: Step Out'},
+		b = {[[:lua require'dap'.toggle_breakpoint()<CR>]], 'DAP: Toggle Breakpoint'},
+		B = {[[:lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>]], 'DAP: Set Breakpoint With Condition'},
+		m = { function()
+					if vim.bo.filetype == 'python' then
+						require'dap-python'.test_method()
+					else
+						print('Invalid filetype for command')
+					end
+				end, 'DAP: Test Method (filetype dependent)'
+			},
+		v = {[[:lua require'dapui'.toggle()<CR>]], 'DAP UI: Toggle UI'}
+	}
+})
+-- vim.keymap.set('n', [[<leader>dc]], [[:lua require'dap'.continue()<CR>]], { desc='DAP: Continue or Start' })
+-- vim.keymap.set('n', [[<leader>do]], [[:lua require'dap'.step_over()<CR>]], { desc='DAP: Step Over' })
+-- vim.keymap.set('n', [[<leader>di]], [[:lua require'dap'.step_into()<CR>]], { desc='DAP: Step Into' })
+-- vim.keymap.set('n', [[<leader>du]], [[:lua require'dap'.set_out()<CR>]], { desc='DAP: Step Out' })
+-- vim.keymap.set('n', [[<leader>db]], [[:lua require'dap'.toggle_breakpoint()<CR>]], { desc='DAP: Toggle Breakpoint' })
+-- vim.keymap.set('n', [[<leader>dB]], [[:lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>]], { desc='DAP: Set Breakpoint With Condition' })
+-- 
+-- -- nvim-dap-python keymaps
+-- vim.keymap.set('n', [[<leader>dm]], function()
+-- 		if vim.bo.filetype == 'python' then
+-- 			vim.cmd([[:lua require'dap-python'.test_method()<CR>]])
+-- 		else
+-- 			print('Invalid filetype for command')
+-- 		end
+-- 	end, { desc = 'DAP: Test Method (filetype dependent)' })

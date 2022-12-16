@@ -72,6 +72,41 @@ return require('packer').startup(function(use)
     -- , after = { 'mason-lspconfig.nvim' }  
   }
 
+  use { 'WhoIsSethDaniel/mason-tool-installer.nvim',
+	config = function()
+	  require('mason-tool-installer').setup {
+		  ensure_installed = {
+			'debugpy',
+			'lua-language-server',
+			'pyright',
+			'json-lsp',
+			'marksman',
+			'sqlls',
+			'taplo',
+			'yaml-language-server'
+		  },
+		  auto_update = true
+	  }
+	end,
+	after = 'mason-lspconfig.nvim'
+}
+
+  -- Debug Plugins
+  use { 'mfussenegger/nvim-dap' }
+  use { "rcarriga/nvim-dap-ui",
+    requires = {"mfussenegger/nvim-dap"},
+    config = function()
+		require('dapui').setup()
+	end
+  }
+  use { 'mfussenegger/nvim-dap-python',
+	config = function()
+	  dap_python = require('dap-python')
+	  dap_python.setup('~/.local/share/nvim/mason/packages/debugpy/venv/bin/python')
+	  dap_python.test_runner = 'pytest'
+	end
+  }
+
   --  Autocompletion
   use { 
     'ms-jpq/coq_nvim',
@@ -85,6 +120,20 @@ return require('packer').startup(function(use)
     -- config = [[require('lang-server-config')]]
   }
 
+  -- Fuzzy Finder (files, lsp, etc)
+  use { 'nvim-telescope/telescope.nvim', 
+  		branch = '0.1.x', 
+		requires = { 'nvim-lua/plenary.nvim' },
+		config = function()
+			require('telescope').setup{
+
+			}
+		end
+  }
+
+  -- Fuzzy Finder Algorithm which requires local dependencies to be built. Only load if `make` is available
+  use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable "make" == 1 }
+
   -- File Explorer
   use { 'ms-jpq/chadtree', run = 'python3 -m chadtree deps', branch = 'chad' }
 
@@ -93,7 +142,10 @@ return require('packer').startup(function(use)
   use {
     'folke/which-key.nvim',
     config = function()
-      require('which-key').setup {}
+      require('which-key').setup {
+		show_keys = false,
+		show_help = false
+	  }
     end
   }
 
@@ -102,7 +154,10 @@ return require('packer').startup(function(use)
     "folke/noice.nvim",
     config = function()
       require("noice").setup({
-          -- add any options here
+        -- add any options here
+		presets = {
+		  long_message_to_split = true
+		}
       })
     end,
     requires = {
@@ -114,6 +169,23 @@ return require('packer').startup(function(use)
       "rcarriga/nvim-notify",
       }
   })
+
+  -- Auto Session management
+  use {
+    'rmagatti/auto-session',
+    config = function()
+      require("auto-session").setup {
+        log_level = "error",
+        auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/"},
+        auto_session_root_dir = os.getenv('HOME')..'/.vim/sessions/',
+		pre_save_cmds = {
+			function()
+				require('dapui').close()
+			end
+		}
+      }
+    end
+  }
 
   -- Onedark Theme
   use 'navarasu/onedark.nvim'
