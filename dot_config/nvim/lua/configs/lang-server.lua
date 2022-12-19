@@ -81,6 +81,7 @@ for _, lsp in ipairs(language_servers) do
   }))
 end
 
+-- Automatically open DAB UI when DAP is active
 local dap, dapui = require('dap'), require('dapui')
 dap.listeners.after.event_initialized['dapui_config'] = function()
 	dapui.open()
