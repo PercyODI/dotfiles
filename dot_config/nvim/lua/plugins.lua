@@ -132,10 +132,10 @@ return require('packer').startup(function(use)
           require("neotest").setup {
               adapters = {
                   require("neotest-python")({
-                      python = function()
-                          local poetry_path = string.gsub(vim.fn.system("poetry env info --path"), '\n+', '') .. '/bin/python'
-                          return poetry_path
-                      end
+                      -- python = function()
+                      --     local poetry_path = string.gsub(vim.fn.system("poetry env info --path"), '\n+', '') .. '/bin/python'
+                      --     return poetry_path
+                      -- end
                   })
               }
           }
