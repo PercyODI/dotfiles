@@ -1,23 +1,13 @@
-local ensure_packer = function()
-    local fn = vim.fn
-    local install_path = fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
-    if fn.empty(fn.glob(install_path)) > 0 then
-        fn.system({ 'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path })
-        vim.cmd [[packadd packer.nvim]]
-        return true
-    end
-    return false
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+    vim.fn.system({ "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", lazypath })
+    vim.fn.system({ "git", "-C", lazypath, "checkout", "tags/stable" }) -- last stable release
 end
+vim.opt.rtp:prepend(lazypath)
 
-local packer_bootstrap = ensure_packer()
-
-return require('packer').startup(function(use)
-    -- Packer manages itself
-    use 'wbthomason/packer.nvim'
-
-    -- Treesitter
-    use { 'nvim-treesitter/nvim-treesitter',
-        run = ':TSUpdate',
+require("lazy").setup({
+    { 'nvim-treesitter/nvim-treesitter',
+        build = ':TSUpdate',
         config = function()
             require('nvim-treesitter.configs').setup {
                 ensure_installed = {
@@ -36,20 +26,20 @@ return require('packer').startup(function(use)
                 indent = { enable = false }
             }
         end
-    }
+    },
+
     ---- Additional textobjects for treesitter
-    use { 'nvim-treesitter/nvim-treesitter-textobjects',
-        -- after = { 'nvim-treesitter' }
-    }
+    { 'nvim-treesitter/nvim-treesitter-textobjects' },
 
     -- Manage external editor tooling i.e LSP servers
-    use { 'williamboman/mason.nvim',
+    { 'williamboman/mason.nvim',
         config = function()
             require('mason').setup()
         end
-    }
+    },
+
     ---- Automatically install language servers to stdpath
-    use { 'williamboman/mason-lspconfig.nvim',
+    { 'williamboman/mason-lspconfig.nvim',
         -- after = { 'mason.nvim' },
         config = function()
             require('mason-lspconfig').setup {
@@ -65,14 +55,9 @@ return require('packer').startup(function(use)
                 }
             }
         end
-    }
+    },
 
-    -- nvim lsp configurations
-    use { 'neovim/nvim-lspconfig'
-        -- , after = { 'mason-lspconfig.nvim' }
-    }
-
-    use { 'WhoIsSethDaniel/mason-tool-installer.nvim',
+    { 'WhoIsSethDaniel/mason-tool-installer.nvim',
         config = function()
             require('mason-tool-installer').setup {
                 ensure_installed = {
@@ -89,10 +74,19 @@ return require('packer').startup(function(use)
                 auto_update = true
             }
         end,
-        after = 'mason-lspconfig.nvim'
-    }
+        -- after = 'mason-lspconfig.nvim'
+    },
 
-    use { 'jose-elias-alvarez/null-ls.nvim',
+    -- nvim lsp configurations
+    { 'neovim/nvim-lspconfig',
+        -- config = function()
+        --     require("config.lsp").setup()
+        -- end,
+        -- , after = { 'mason-lspconfig.nvim' }
+    },
+
+
+    { 'jose-elias-alvarez/null-ls.nvim',
         config = function()
             local null_ls = require('null-ls')
             null_ls.setup {
@@ -101,95 +95,323 @@ return require('packer').startup(function(use)
                 }
             }
         end
-    }
+    },
 
     -- Debug Plugins
-    use { 'mfussenegger/nvim-dap' }
-    use { "rcarriga/nvim-dap-ui",
+    { 'mfussenegger/nvim-dap' },
+    { "rcarriga/nvim-dap-ui",
         requires = { "mfussenegger/nvim-dap" },
         config = function()
             require('dapui').setup()
+
+            -- Automatically open DAP UI when DAP is active
+            local dap, dapui = require('dap'), require('dapui')
+            dap.listeners.after.event_initialized['dapui_config'] = function()
+                dapui.open()
+            end
+            dap.listeners.before.event_terminated['dapui_config'] = function()
+                dapui.close()
+            end
+            dap.listeners.before.event_exited['dapui_config'] = function()
+                dapui.close()
+            end
         end
-    }
-    use { 'mfussenegger/nvim-dap-python',
+    },
+    { 'mfussenegger/nvim-dap-python',
         config = function()
             local dap_python = require('dap-python')
             dap_python.setup('~/.local/share/nvim/mason/packages/debugpy/venv/bin/python')
             dap_python.test_runner = 'pytest'
         end
-    }
+    },
 
     -- Testing Plugins
-    use {
-      "nvim-neotest/neotest",
-      requires = {
-        "nvim-lua/plenary.nvim",
-        "nvim-treesitter/nvim-treesitter",
-        "antoinemadec/FixCursorHold.nvim",
-        "nvim-neotest/neotest-python"
-      },
-      config = function()
-          require("neotest").setup {
-              adapters = {
-                  require("neotest-python")({
-                      -- python = function()
-                      --     local poetry_path = string.gsub(vim.fn.system("poetry env info --path"), '\n+', '') .. '/bin/python'
-                      --     return poetry_path
-                      -- end
-                  })
-              }
-          }
-      end
-    }
+    {
+        "nvim-neotest/neotest",
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            "nvim-treesitter/nvim-treesitter",
+            "antoinemadec/FixCursorHold.nvim",
+            "nvim-neotest/neotest-python"
+        },
+        config = function()
+            require("neotest").setup {
+                adapters = {
+                    require("neotest-python")({
+                        python = function()
+                            local poetry_path = string.gsub(vim.fn.system("poetry env info --path"), '\n+', '') ..
+                                '/bin/python'
+                            return poetry_path
+                        end
+                    })
+                }
+            }
+        end
+    },
 
     --  Autocompletion
-    use {
+    {
         'ms-jpq/coq_nvim',
         -- after = { 'nvim-lspconfig' },
         branch = 'coq',
-        run = ":COQdeps"
-    }
-    use { 'ms-jpq/coq.artifacts',
+        enabled = false,
+        build = ":COQdeps",
+        init = function()
+            vim.g.coq_settings = {
+                auto_start = 'shut-up',
+                display = {
+                    preview = {
+                        positions = {
+                            north = 1,
+                            south = 2,
+                            west = nil,
+                            east = 3
+                        }
+                    },
+                    pum = {
+                        fast_close = false
+                    }
+                },
+                keymap = {
+                    jump_to_mark = ''
+                }
+            }
+        end,
+        config = function()
+            print('Starting lang-server-config')
+
+            local lspconfig = require('lspconfig')
+
+            -- Sets up COQ with nvim-lspconfig configs.
+            -- Must be done after nvim-lspconfig
+
+            local coq = require('coq')
+
+            local language_servers = {
+                'sumneko_lua',
+                'pyright',
+                'jsonls',
+                'marksman',
+                'sqlls',
+                'taplo',
+                'yamlls'
+            }
+
+            -- Mappings.
+            -- See `:help vim.diagnostic.*` for documentation on any of the below functions
+            vim.keymap.set('n', '<space>e', vim.diagnostic.open_float,
+                { noremap = true, silent = true, desc = 'LSP: Diagnostic Open Float' })
+            vim.keymap.set('n', '[d', vim.diagnostic.goto_prev,
+                { noremap = true, silent = true, desc = 'LSP: Diagnostic Go To Previous' })
+            vim.keymap.set('n', ']d', vim.diagnostic.goto_next,
+                { noremap = true, silent = true, desc = 'LSP: Diagnostic Go To Next' })
+            vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist,
+                { noremap = true, silent = true, desc = 'LSP: Diagnostic SetLocList' })
+
+            -- Borrowed from https://github.com/neovim/nvim-lspconfig#suggested-configuration
+            -- Use an on_attach function to only map the following keys
+            -- after the language server attaches to the current buffer
+            local on_attach = function(client, bufnr)
+                -- Enable completion triggered by <c-x><c-o>
+                -- vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+                -- Mappings.
+                -- See `:help vim.lsp.*` for documentation on any of the below functions
+                local bufopts = function(desc)
+                    return { noremap = true, silent = true, buffer = bufnr, desc = desc }
+                end
+                vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts("LSP: Go To Declaration"))
+                vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts("LSP: Go To Definition"))
+                vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts("LSP: Hover"))
+                vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts("LSP: Go To Implementation"))
+                vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts("LSP: Signature Help"))
+                vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts("LSP: Add Workspace Folder"))
+                vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder,
+                    bufopts("LSP: Remove Workspace Folder"))
+                vim.keymap.set('n', '<space>wl', function()
+                    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+                end, bufopts("LSP: List Workspace Folders"))
+                vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts("LSP: Type Definition"))
+                vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts("LSP: Rename"))
+                vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts("LSP: Code Action"))
+                vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts("LSP: Go To References"))
+                vim.keymap.set('n', '<space>F', function() vim.lsp.buf.format { async = true } end,
+                    bufopts("LSP: Format"))
+
+
+            end
+
+            -- local lsp_flags = {
+            --   -- This is the default in Nvim 0.7+
+            --   debounce_text_changes = 150,
+            -- }
+
+            for _, lsp in ipairs(language_servers) do
+                lspconfig[lsp].setup(coq.lsp_ensure_capabilities({
+                    on_attach = on_attach,
+                    -- flags = lsp_flags
+                }))
+            end
+
+        end
+    },
+
+    { 'ms-jpq/coq.artifacts',
         branch = 'artifacts',
+        enabled = false,
         -- after = { 'coq_nvim', 'nvim-lspconfig' },
         -- config = [[require('lang-server-config')]]
-    }
+    },
 
+    { 'ms-jpq/coq.thirdparty',
+        enabled = false
+    },
+
+    { 'hrsh7th/nvim-cmp',
+        dependencies = {
+            'hrsh7th/cmp-nvim-lsp',
+            'L3MON4D3/LuaSnip',
+            'hrsh7th/cmp-buffer',
+            'hrsh7th/cmp-path',
+            'hrsh7th/cmp-cmdline',
+        },
+        enabled = true,
+        config = function()
+            -- Add additional capabilities supported by nvim-cmp
+            local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+            local lspconfig = require('lspconfig')
+
+            -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
+            local servers = { 'clangd', 'rust_analyzer', 'pyright', 'tsserver', 'sumneko_lua', }
+
+            -- Mappings.
+            -- See `:help vim.diagnostic.*` for documentation on any of the below functions
+            vim.keymap.set('n', '<space>e', vim.diagnostic.open_float,
+                { noremap = true, silent = true, desc = 'LSP: Diagnostic Open Float' })
+            vim.keymap.set('n', '[d', vim.diagnostic.goto_prev,
+                { noremap = true, silent = true, desc = 'LSP: Diagnostic Go To Previous' })
+            vim.keymap.set('n', ']d', vim.diagnostic.goto_next,
+                { noremap = true, silent = true, desc = 'LSP: Diagnostic Go To Next' })
+            vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist,
+                { noremap = true, silent = true, desc = 'LSP: Diagnostic SetLocList' })
+
+            -- Borrowed from https://github.com/neovim/nvim-lspconfig#suggested-configuration
+            -- Use an on_attach function to only map the following keys
+            -- after the language server attaches to the current buffer
+            local on_attach = function(client, bufnr)
+                -- Enable completion triggered by <c-x><c-o>
+                -- vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+                -- Mappings.
+                -- See `:help vim.lsp.*` for documentation on any of the below functions
+                local bufopts = function(desc)
+                    return { noremap = true, silent = true, buffer = bufnr, desc = desc }
+                end
+                vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts("LSP: Go To Declaration"))
+                vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts("LSP: Go To Definition"))
+                vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts("LSP: Hover"))
+                vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts("LSP: Go To Implementation"))
+                vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts("LSP: Signature Help"))
+                vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts("LSP: Add Workspace Folder"))
+                vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder,
+                    bufopts("LSP: Remove Workspace Folder"))
+                vim.keymap.set('n', '<space>wl', function()
+                    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+                end, bufopts("LSP: List Workspace Folders"))
+                vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts("LSP: Type Definition"))
+                vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts("LSP: Rename"))
+                vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts("LSP: Code Action"))
+                vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts("LSP: Go To References"))
+                vim.keymap.set('n', '<space>F', function() vim.lsp.buf.format { async = true } end,
+                    bufopts("LSP: Format"))
+            end
+            for _, lsp in ipairs(servers) do
+              lspconfig[lsp].setup {
+                on_attach = on_attach,
+                capabilities = capabilities,
+              }
+            end
+
+            -- luasnip setup
+            local luasnip = require 'luasnip'
+
+            -- nvim-cmp setup
+            local cmp = require 'cmp'
+            cmp.setup {
+              snippet = {
+                expand = function(args)
+                  luasnip.lsp_expand(args.body)
+                end,
+              },
+              mapping = cmp.mapping.preset.insert({
+                ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+                ['<C-f>'] = cmp.mapping.scroll_docs(4),
+                ['<C-Space>'] = cmp.mapping.complete(),
+                ['<CR>'] = cmp.mapping.confirm {
+                  behavior = cmp.ConfirmBehavior.Replace,
+                  select = true,
+                },
+                ['<Tab>'] = cmp.mapping(function(fallback)
+                  if cmp.visible() then
+                    cmp.select_next_item()
+                  elseif luasnip.expand_or_jumpable() then
+                    luasnip.expand_or_jump()
+                  else
+                    fallback()
+                  end
+                end, { 'i', 's' }),
+                ['<S-Tab>'] = cmp.mapping(function(fallback)
+                  if cmp.visible() then
+                    cmp.select_prev_item()
+                  elseif luasnip.jumpable(-1) then
+                    luasnip.jump(-1)
+                  else
+                    fallback()
+                  end
+                end, { 'i', 's' }),
+              }),
+              sources = {
+                { name = 'nvim_lsp' },
+                { name = 'luasnip' },
+              },
+            }
+        end
+    },
     -- Comments with hotkeys
-    use {
+    {
         'numToStr/Comment.nvim',
         config = function()
             require('Comment').setup()
         end
-    }
+    },
 
     -- Toggle Terminal
-    use {"akinsho/toggleterm.nvim",
-        tag = '*',
+    { "akinsho/toggleterm.nvim",
         config = function()
             require("toggleterm").setup {
                 open_mapping = [[<c-\>]]
             }
         end
-    }
+    },
 
     -- Fuzzy Finder (files, lsp, etc)
-    use { 'nvim-telescope/telescope.nvim',
+    { 'nvim-telescope/telescope.nvim',
         branch = '0.1.x',
-        requires = { 'nvim-lua/plenary.nvim' },
+        dependencies = { 'nvim-lua/plenary.nvim' },
         config = function()
             require('telescope').setup {
 
             }
         end
-    }
+    },
 
     -- Fuzzy Finder Algorithm which requires local dependencies to be built. Only load if `make` is available
-    use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable "make" == 1 }
-
+    { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable "make" == 1 },
+    --
     -- File Explorer
-    use { 'ms-jpq/chadtree',
-        run = 'python3 -m chadtree deps',
+    { 'ms-jpq/chadtree',
+        build = 'python3 -m chadtree deps',
         branch = 'chad',
         config = function()
             local chadtree_settings = {
@@ -201,32 +423,30 @@ return require('packer').startup(function(use)
             }
             vim.api.nvim_set_var("chadtree_settings", chadtree_settings)
         end
-    }
+    },
 
     -- Git signs
-    use { 'lewis6991/gitsigns.nvim',
+    { 'lewis6991/gitsigns.nvim',
         -- tag = 'release', -- To use the latest release (do not use this if you run Neovim nightly or dev builds!)
         config = function()
             require('gitsigns').setup {
 
             }
         end
-    }
+    },
 
     -- Which Key for viewing command possibilities
-    use {
-        'folke/which-key.nvim',
+    { 'folke/which-key.nvim',
         config = function()
             require('which-key').setup {
                 show_keys = false,
                 show_help = false
             }
         end
-    }
-
+    },
+    --
     -- Better command line and displaying nvim messages
-    use({
-        "folke/noice.nvim",
+    { "folke/noice.nvim",
         config = function()
             require("noice").setup({
                 -- add any options here
@@ -235,7 +455,7 @@ return require('packer').startup(function(use)
                 }
             })
         end,
-        requires = {
+        dependencies = {
             -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
             "MunifTanjim/nui.nvim",
             -- OPTIONAL:
@@ -243,11 +463,10 @@ return require('packer').startup(function(use)
             --   If not available, we use `mini` as the fallback
             "rcarriga/nvim-notify",
         }
-    })
+    },
 
     -- Auto Session management
-    use {
-        'rmagatti/auto-session',
+    { 'rmagatti/auto-session',
         config = function()
             require("auto-session").setup {
                 log_level = "error",
@@ -274,32 +493,21 @@ return require('packer').startup(function(use)
                 }
             }
         end
-    }
+    },
 
     -- Auto number toggling when switching buffers
-    use {
-        "sitiom/nvim-numbertoggle",
-        config = function()
-            require("numbertoggle").setup()
-        end
-    }
-
+    { "sitiom/nvim-numbertoggle" },
+    --
     -- Onedark Theme
-    use 'navarasu/onedark.nvim'
-
+    { 'navarasu/onedark.nvim' },
+    --
     -- Better Statusline
-    use { 'nvim-lualine/lualine.nvim',
-        requires = { 'kyazdani42/nvim-web-devicons', opt = true },
+    { 'nvim-lualine/lualine.nvim',
+        dependencies = { 'kyazdani42/nvim-web-devicons' },
         config = function()
             require('lualine').setup {
                 extensions = { 'chadtree', 'nvim-dap-ui' }
             }
         end
-    }
-
-    -- Automatically set up your configuration after cloning packer.nvim
-    -- Put this at the end after all plugins
-    if packer_bootstrap then
-        require('packer').sync()
-    end
-end)
+    },
+})

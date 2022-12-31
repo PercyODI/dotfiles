@@ -1,4 +1,7 @@
 print('Starting lang-server-config')
+
+local lspconfig = require('lspconfig')
+
 -- Sets up COQ with nvim-lspconfig configs.
 -- Must be done after nvim-lspconfig
 vim.g.coq_settings = { 
@@ -11,7 +14,10 @@ vim.g.coq_settings = {
 		  west = nil,
 		  east = nil
 	  }
-    }
+    },
+    -- pum = {
+    --   fast_close = false
+    -- }
   },
   keymap = {
 	jump_to_mark = ''
@@ -19,7 +25,6 @@ vim.g.coq_settings = {
 }
 
 local coq = require('coq')
-local lspconfig = require('lspconfig')
 
 local language_servers = {
   'sumneko_lua',
@@ -69,19 +74,19 @@ local on_attach = function(client, bufnr)
 
 end
 
-local lsp_flags = {
-  -- This is the default in Nvim 0.7+
-  debounce_text_changes = 150,
-}
+-- local lsp_flags = {
+--   -- This is the default in Nvim 0.7+
+--   debounce_text_changes = 150,
+-- }
 
 for _, lsp in ipairs(language_servers) do
   lspconfig[lsp].setup(coq.lsp_ensure_capabilities({
     on_attach = on_attach,
-    flags = lsp_flags
+    -- flags = lsp_flags
   }))
 end
 
--- Automatically open DAB UI when DAP is active
+-- Automatically open DAP UI when DAP is active
 local dap, dapui = require('dap'), require('dapui')
 dap.listeners.after.event_initialized['dapui_config'] = function()
 	dapui.open()
