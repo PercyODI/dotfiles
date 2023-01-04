@@ -32,3 +32,5 @@ vim.wo.wrap = false
 -- Check if file changed outside vim & re-read file
 autocmd('focus_gain', [[FocusGained * silent! noautocmd checktime]], true)
 
+-- Set completeopt for nvim-cmp
+vim.opt.completeopt = {'menu', 'menuone', 'noselect'}

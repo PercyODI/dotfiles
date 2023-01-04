@@ -51,7 +51,8 @@ require("lazy").setup({
                     'marksman',
                     'sqlls',
                     'taplo',
-                    'yamlls'
+                    'yamlls',
+                    'misspell'
                 }
             }
         end
@@ -69,7 +70,8 @@ require("lazy").setup({
                     'marksman',
                     'sqlls',
                     'taplo',
-                    'yaml-language-server'
+                    'yaml-language-server',
+                    'misspell'
                 },
                 auto_update = true
             }
@@ -91,7 +93,8 @@ require("lazy").setup({
             local null_ls = require('null-ls')
             null_ls.setup {
                 sources = {
-                    null_ls.builtins.formatting.autopep8
+                    null_ls.builtins.formatting.autopep8,
+                    null_ls.builtins.diagnostics.misspell
                 }
             }
         end
@@ -350,7 +353,7 @@ require("lazy").setup({
                 ['<C-Space>'] = cmp.mapping.complete(),
                 ['<CR>'] = cmp.mapping.confirm {
                   behavior = cmp.ConfirmBehavior.Replace,
-                  select = true,
+                  select = false, -- Don't auto select on Enter.
                 },
                 ['<Tab>'] = cmp.mapping(function(fallback)
                   if cmp.visible() then
@@ -378,6 +381,16 @@ require("lazy").setup({
             }
         end
     },
+
+    --
+    {
+        'tpope/vim-dadbod'
+    },
+
+    {
+        'kristijanhusak/vim-dadbod-ui'
+    },
+
     -- Comments with hotkeys
     {
         'numToStr/Comment.nvim',

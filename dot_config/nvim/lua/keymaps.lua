@@ -38,11 +38,14 @@ local builtin = require('telescope.builtin')
 wk.register({
     ['<leader>f'] = {
         name = "Telescope Commands",
+        a = { builtin.builtin, 'Find Built-in Telescope Pickers' },
         f = { builtin.find_files, 'Find Files' },
         g = { builtin.live_grep, 'Find Live Grep' },
         b = { builtin.buffers, 'Find in Buffers' },
+        j = { builtin.jumplist, 'Find in Jump List Entries' },
         h = { builtin.help_tags, 'Find in Help Tags' },
         k = { builtin.keymaps, 'Find in Keymaps' },
+        r = { builtin.registers, 'Find in Registers' },
         l = {
             name = "Find in LSP",
             r = { builtin.lsp_references, 'Find LSP References' },
