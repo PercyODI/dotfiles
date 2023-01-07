@@ -52,7 +52,6 @@ require("lazy").setup({
                     'sqlls',
                     'taplo',
                     'yamlls',
-                    'misspell'
                 }
             }
         end
@@ -71,7 +70,7 @@ require("lazy").setup({
                     'sqlls',
                     'taplo',
                     'yaml-language-server',
-                    'misspell'
+                    -- 'misspell'
                 },
                 auto_update = true
             }
@@ -94,7 +93,8 @@ require("lazy").setup({
             null_ls.setup {
                 sources = {
                     null_ls.builtins.formatting.autopep8,
-                    null_ls.builtins.diagnostics.misspell
+                    -- null_ls.builtins.diagnostics.misspell,
+                    -- null_ls.builtins.completion.spell,
                 }
             }
         end
@@ -277,6 +277,7 @@ require("lazy").setup({
             'hrsh7th/cmp-buffer',
             'hrsh7th/cmp-path',
             'hrsh7th/cmp-cmdline',
+            'f3fora/cmp-spell',
         },
         enabled = true,
         config = function()
@@ -330,10 +331,10 @@ require("lazy").setup({
                     bufopts("LSP: Format"))
             end
             for _, lsp in ipairs(servers) do
-              lspconfig[lsp].setup {
-                on_attach = on_attach,
-                capabilities = capabilities,
-              }
+                lspconfig[lsp].setup {
+                    on_attach = on_attach,
+                    capabilities = capabilities,
+                }
             end
 
             -- luasnip setup
@@ -342,47 +343,68 @@ require("lazy").setup({
             -- nvim-cmp setup
             local cmp = require 'cmp'
             cmp.setup {
-              snippet = {
-                expand = function(args)
-                  luasnip.lsp_expand(args.body)
-                end,
-              },
-              mapping = cmp.mapping.preset.insert({
-                ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-                ['<C-f>'] = cmp.mapping.scroll_docs(4),
-                ['<C-Space>'] = cmp.mapping.complete(),
-                ['<CR>'] = cmp.mapping.confirm {
-                  behavior = cmp.ConfirmBehavior.Replace,
-                  select = false, -- Don't auto select on Enter.
+                snippet = {
+                    expand = function(args)
+                        luasnip.lsp_expand(args.body)
+                    end,
                 },
-                ['<Tab>'] = cmp.mapping(function(fallback)
-                  if cmp.visible() then
-                    cmp.select_next_item()
-                  elseif luasnip.expand_or_jumpable() then
-                    luasnip.expand_or_jump()
-                  else
-                    fallback()
-                  end
-                end, { 'i', 's' }),
-                ['<S-Tab>'] = cmp.mapping(function(fallback)
-                  if cmp.visible() then
-                    cmp.select_prev_item()
-                  elseif luasnip.jumpable(-1) then
-                    luasnip.jump(-1)
-                  else
-                    fallback()
-                  end
-                end, { 'i', 's' }),
-              }),
-              sources = {
-                { name = 'nvim_lsp' },
-                { name = 'luasnip' },
-              },
+                mapping = cmp.mapping.preset.insert({
+                    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+                    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+                    ['<C-Space>'] = cmp.mapping.complete(),
+                    ['<CR>'] = cmp.mapping.confirm {
+                        behavior = cmp.ConfirmBehavior.Replace,
+                        select = false, -- Don't auto select on Enter.
+                    },
+                    ['<Tab>'] = cmp.mapping(function(fallback)
+                        if cmp.visible() then
+                            cmp.select_next_item()
+                        elseif luasnip.expand_or_jumpable() then
+                            luasnip.expand_or_jump()
+                        else
+                            fallback()
+                        end
+                    end, { 'i', 's' }),
+                    ['<S-Tab>'] = cmp.mapping(function(fallback)
+                        if cmp.visible() then
+                            cmp.select_prev_item()
+                        elseif luasnip.jumpable(-1) then
+                            luasnip.jump(-1)
+                        else
+                            fallback()
+                        end
+                    end, { 'i', 's' }),
+                }),
+                sources = {
+                    { name = 'nvim_lsp' },
+                    { name = 'luasnip' },
+                    { name = 'spell',
+                        option = {
+                            keep_all_entries = false,
+                        },
+                    },
+                },
             }
         end
     },
 
-    --
+    {
+        'psliwka/vim-dirtytalk',
+        build = function ()
+            print('Updating programming dictionary')
+            vim.cmd('DirtytalkUpdate')
+        end
+    },
+
+    -- Adding surround for quotes, brackets, etc
+    {
+        'kylechui/nvim-surround',
+        config = function ()
+            require('nvim-surround').setup({})
+        end
+    },
+
+    -- Adding Dadbod for database connections
     {
         'tpope/vim-dadbod'
     },

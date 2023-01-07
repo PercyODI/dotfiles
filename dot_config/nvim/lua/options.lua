@@ -28,9 +28,19 @@ vim.opt.cursorline = true
 
 -- Set nowrap as default
 vim.wo.wrap = false
+vim.wo.linebreak = true
+
+-- Set an 80 and 120 column line for reference
+vim.opt.colorcolumn = {80, 120}
+vim.g.colorcolumntoggle = true
 
 -- Check if file changed outside vim & re-read file
 autocmd('focus_gain', [[FocusGained * silent! noautocmd checktime]], true)
 
 -- Set completeopt for nvim-cmp
 vim.opt.completeopt = {'menu', 'menuone', 'noselect'}
+
+-- Set spellcheck to on
+vim.opt.runtimepath:append('~/.local/share/nvim/site,')
+vim.opt.spell = true
+vim.opt.spelllang = { 'en_us', 'programming' }

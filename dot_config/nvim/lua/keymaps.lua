@@ -30,6 +30,23 @@ vim.keymap.set('n', 'crp', ':let @+ = expand("%:~")<CR>', { desc = 'copy current
 -- copy current file name
 vim.keymap.set('n', 'cn', ':let @+ = expand("%:t")<CR>', { desc = 'copy current file name' })
 
+wk.register({
+    -- toggle wordwrap
+    ['<leader>ww'] = { ':set wrap!<CR>', 'Toggle Word Wrap' },
+    -- toggle column highlighting
+    ['<leader>cc'] = { function ()
+            if(vim.g.colorcolumntoggle == true)
+            then
+                vim.opt.colorcolumn = {}
+                vim.g.colorcolumntoggle = false
+            else
+                vim.opt.colorcolumn = { '80', '120' }
+                vim.g.colorcolumntoggle = true
+            end
+        end
+    , 'Toggle Color Column'}
+})
+
 -- open CHADTree
 vim.keymap.set('n', '<Leader>v', '<cmd>CHADopen<CR>', {})
 
