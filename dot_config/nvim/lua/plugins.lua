@@ -141,11 +141,11 @@ require("lazy").setup({
             require("neotest").setup {
                 adapters = {
                     require("neotest-python")({
-                        python = function()
-                            local poetry_path = string.gsub(vim.fn.system("poetry env info --path"), '\n+', '') ..
-                                '/bin/python'
-                            return poetry_path
-                        end
+                        -- python = function()
+                        --     local poetry_path = string.gsub(vim.fn.system("poetry env info --path"), '\n+', '') ..
+                        --         '/bin/python'
+                        --     return poetry_path
+                        -- end
                     })
                 }
             }
@@ -287,7 +287,11 @@ require("lazy").setup({
             local lspconfig = require('lspconfig')
 
             -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
-            local servers = { 'clangd', 'rust_analyzer', 'pyright', 'tsserver', 'sumneko_lua', }
+            local servers = { ['clangd'] = {},
+                ['rust_analyzer'] = {},
+                ['pyright'] = {},
+                ['tsserver'] = {},
+                ['sumneko_lua'] = {}, }
 
             -- Mappings.
             -- See `:help vim.diagnostic.*` for documentation on any of the below functions
@@ -330,10 +334,11 @@ require("lazy").setup({
                 vim.keymap.set('n', '<space>F', function() vim.lsp.buf.format { async = true } end,
                     bufopts("LSP: Format"))
             end
-            for _, lsp in ipairs(servers) do
+            for lsp, settings in pairs(servers) do
                 lspconfig[lsp].setup {
                     on_attach = on_attach,
                     capabilities = capabilities,
+                    settings = settings
                 }
             end
 
@@ -390,7 +395,7 @@ require("lazy").setup({
 
     {
         'psliwka/vim-dirtytalk',
-        build = function ()
+        build = function()
             print('Updating programming dictionary')
             vim.cmd('DirtytalkUpdate')
         end
@@ -399,7 +404,7 @@ require("lazy").setup({
     -- Adding surround for quotes, brackets, etc
     {
         'kylechui/nvim-surround',
-        config = function ()
+        config = function()
             require('nvim-surround').setup({})
         end
     },

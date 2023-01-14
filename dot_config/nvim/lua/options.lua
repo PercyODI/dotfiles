@@ -31,16 +31,47 @@ vim.wo.wrap = false
 vim.wo.linebreak = true
 
 -- Set an 80 and 120 column line for reference
-vim.opt.colorcolumn = {80, 120}
+vim.opt.colorcolumn = { 80, 120 }
 vim.g.colorcolumntoggle = true
 
 -- Check if file changed outside vim & re-read file
 autocmd('focus_gain', [[FocusGained * silent! noautocmd checktime]], true)
 
 -- Set completeopt for nvim-cmp
-vim.opt.completeopt = {'menu', 'menuone', 'noselect'}
+vim.opt.completeopt = { 'menu', 'menuone', 'noselect' }
 
 -- Set spellcheck to on
 vim.opt.runtimepath:append('~/.local/share/nvim/site,')
-vim.opt.spell = true
+-- vim.wo.spell = true
 vim.opt.spelllang = { 'en_us', 'programming' }
+
+vim.api.nvim_create_autocmd(
+    'BufEnter',
+    {
+        pattern = { '*.txt', '*.md' },
+        group = vim.api.nvim_create_augroup('Spell', { clear = true }),
+        command = [[:setlocal spell]]
+    })
+-- vim.api.nvim_create_autocmd(
+--     'TermEnter',
+--     {
+--         pattern = 'term://*toggleterm#*',
+--         group = vim.api.nvim_create_augroup('Spell', { clear = true }),
+--         command = [[:setlocal nospell]]
+--         -- callback = function()
+--         --     print("Setting toggle term window spelling")
+--         --     vim.cmd([[:setlocal nospell]])
+--         -- vim.api.nvim_set_option_value("spell", false, { scope = 'local', win = 0 })
+--         -- end
+--     })
+--
+-- vim.api.nvim_create_autocmd(
+--     'WinEnter',
+--     {
+--         pattern = { 'CHADTree', '*' },
+--         group = vim.api.nvim_create_augroup('Spell', { clear = true }),
+--         callback = function (args)
+--             vim.pretty_print(args)
+--         end
+--         -- command = [[:setlocal nospell | print("done spelled")]]
+--     })
