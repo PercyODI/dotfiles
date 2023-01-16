@@ -34,17 +34,18 @@ wk.register({
     -- toggle wordwrap
     ['<leader>ww'] = { ':set wrap!<CR>', 'Toggle Word Wrap' },
     -- toggle column highlighting
-    ['<leader>cc'] = { function ()
-            if(vim.g.colorcolumntoggle == true)
-            then
-                vim.opt.colorcolumn = {}
-                vim.g.colorcolumntoggle = false
-            else
-                vim.opt.colorcolumn = { '80', '120' }
-                vim.g.colorcolumntoggle = true
-            end
+    ['<leader>cc'] = { function()
+        if (vim.g.colorcolumntoggle == true)
+        then
+            vim.opt.colorcolumn = {}
+            vim.g.colorcolumntoggle = false
+        else
+            vim.opt.colorcolumn = { '80', '120' }
+            vim.g.colorcolumntoggle = true
         end
-    , 'Toggle Color Column'}
+    end
+        , 'Toggle Color Column' },
+    ['<leader>mm'] = { ':MarkdownPreview<CR>', 'Markdown Preview' }
 })
 
 -- open CHADTree

@@ -291,7 +291,9 @@ require("lazy").setup({
                 ['rust_analyzer'] = {},
                 ['pyright'] = {},
                 ['tsserver'] = {},
-                ['sumneko_lua'] = {}, }
+                ['sumneko_lua'] = {},
+                ['marksman'] = {}
+            }
 
             -- Mappings.
             -- See `:help vim.diagnostic.*` for documentation on any of the below functions
@@ -473,6 +475,12 @@ require("lazy").setup({
 
             }
         end
+    },
+
+    -- Markdown Previewing
+    { 'iamcco/markdown-preview.nvim',
+        build = 'echo "instaling markdown preview" && cd app && yarn install',
+        -- enabled = false,
     },
 
     -- Which Key for viewing command possibilities
