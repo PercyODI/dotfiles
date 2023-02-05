@@ -440,11 +440,21 @@ require("lazy").setup({
     -- Fuzzy Finder (files, lsp, etc)
     { 'nvim-telescope/telescope.nvim',
         branch = '0.1.x',
-        dependencies = { 'nvim-lua/plenary.nvim' },
+        dependencies = {
+            'nvim-lua/plenary.nvim',
+            'nvim-telescope/telescope-file-browser.nvim'
+        },
         config = function()
             require('telescope').setup {
+                -- extensions = {
+                --     file_browser = {
+                --         -- path = '%:p:h'
+                --     }
+                -- }
 
             }
+            -- require('telescope').load_extension 'file_browser'
+            -- require('telescope').load_extension 'noice'
         end
     },
 
@@ -545,6 +555,9 @@ require("lazy").setup({
 
     -- Auto number toggling when switching buffers
     { "sitiom/nvim-numbertoggle" },
+
+    -- Easy Motion
+    { "easymotion/vim-easymotion" },
     --
     -- Onedark Theme
     { 'navarasu/onedark.nvim' },

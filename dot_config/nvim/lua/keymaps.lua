@@ -24,11 +24,15 @@ vim.keymap.set('n', '-', ':resize +5<CR>', {})
 vim.keymap.set('n', '_', ':resize -5<CR>', {})
 
 -- copy path to file from CWD
-vim.keymap.set('n', 'cp', ':let @+ = expand("%")<CR>', { desc = 'copy path to file from CWD' })
--- copy current relative file path
-vim.keymap.set('n', 'crp', ':let @+ = expand("%:~")<CR>', { desc = 'copy current relative file path' })
--- copy current file name
-vim.keymap.set('n', 'cn', ':let @+ = expand("%:t")<CR>', { desc = 'copy current file name' })
+wk.register({
+    c = {
+        p = { ':let @+ = expand("%")<CR>', 'copy path to file from CWD' },
+        -- copy current relative file path
+        ['rp'] = { ':let @+ = expand("%:~")<CR>', 'copy current relative file path' },
+        -- copy current file name
+        n = { ':let @+ = expand("%:t")<CR>', 'copy current file name' },
+    }
+})
 
 wk.register({
     -- toggle wordwrap
@@ -57,6 +61,11 @@ wk.register({
     ['<leader>f'] = {
         name = "Telescope Commands",
         a = { builtin.builtin, 'Find Built-in Telescope Pickers' },
+        d = {
+            function() require('telescope').extensions.file_browser.file_browser({ path = '%:p:h' }) end,
+            'Find in File Browser (Current File)'
+        },
+        D = { require('telescope').extensions.file_browser.file_browser, 'Find in File Browser (cwd)' },
         f = { builtin.find_files, 'Find Files' },
         g = { builtin.live_grep, 'Find Live Grep' },
         b = { builtin.buffers, 'Find in Buffers' },
