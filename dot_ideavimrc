@@ -1,0 +1,55 @@
+" Set Space as map leader
+nnoremap <SPACE> <Nop>
+let mapleader = " "
+
+" Plugins
+Plug 'easymotion/vim-easymotion'
+Plug 'preservim/nerdtree'
+
+" Set options
+set relativenumber
+set number
+set visualbell
+set tm=500
+
+imap jk <Esc>
+set timeoutlen=1000
+
+" Mappings for Plugins
+nnoremap <leader>v :NERDTreeFocus<CR>
+nnoremap <leader>nc :NERDTreeClose<CR>
+
+" Mappings for PyCharm Actions
+nnoremap gd :action GotoDeclaration<CR>
+nnoremap gs :action GotoSuperMethod<CR>
+nnoremap gi :action GotoImplementation<CR>
+nnoremap gc :action CommentByLineComment<CR>
+vnoremap gc :action CommentByLineComment<CR>
+nnoremap gr :action ShowUsages<CR>
+nnoremap <C-Space> :action ShowIntentionActions<CR>
+"inoremap <C-Space> :action ShowIntentionActions<CR>
+nnoremap <C-h> :action PrevSplitter<CR>
+nnoremap <C-l> :action NextSplitter<CR>
+nnoremap <A-h> :action PreviousTab<CR>
+nnoremap <A-l> :action NextTab<CR>
+
+nnoremap <S-C-l> :action com.mnw.tabmover.actions.MoveTabToNextSplitter<CR>
+nnoremap <S-C-h> :action com.mnw.tabmover.actions.MoveTabToPreviousSplitter<CR>
+nnoremap <C-A-l> :action MoveTabRight<CR>
+"nnoremap <S-C-h> <C-h> \|:action MoveTabRight<CR> \|<C-h>
+
+nnoremap <leader>ff :action GotoFile<CR>
+nnoremap / :action Find<CR>
+nnoremap <leader>e :action ShowErrorDescription<CR>
+nnoremap <leader>rn :action RenameElement<CR>
+nnoremap <leader>rr :action Refactorings.QuickListPopupAction<CR>
+
+"nnoremap <leader>cb :action CollapseBlock<CR>
+nnoremap <leader>cr :action CollapseRegion<CR>
+nnoremap <leader>ce :action ExpandRegion<CR>
+nnoremap <leader>cl5 :action ExpandToLevel5<CR>
+
+"" Mappings for Debugging actions
+nnoremap <leader>db :action ToggleLineBreakpoint<CR>
+nnoremap <leader>tt :action RunClass<CR>
+nnoremap <leader>td :action DebugClass<CR>
