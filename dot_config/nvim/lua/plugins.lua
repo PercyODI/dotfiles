@@ -557,7 +557,9 @@ require("lazy").setup({
     { "sitiom/nvim-numbertoggle" },
 
     -- Easy Motion
-    { "easymotion/vim-easymotion" },
+    { 'easymotion/vim-easymotion' },
+    -- Window QOL
+    { 'roman/golden-ratio' },
     --
     -- Onedark Theme
     { 'navarasu/onedark.nvim' },
