@@ -30,12 +30,7 @@ sudo apt install ${linuxpackages[*]}
 git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.10.3
 
 # Get wezterm
-if [ ! command -v wezterm > /dev/null 2>&1 ]; then
-    curl -L https://github.com/wez/wezterm/releases/download/20221119-145034-49b9839f/wezterm-20221119-145034-49b9839f.Ubuntu22.04.deb -o /tmp/wezterm.deb
-    sudo apt install -y /tmp/wezterm.deb
-else
-    echo 'Wezterm installed. Skipping.'
-fi
+flatpak install flathub org.wezfurlong.wezterm
 
 
 # ----- Install Fonts -----
